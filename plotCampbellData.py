@@ -28,39 +28,55 @@ def plotCampbellData(OP, Freq, Damp, sx='WS_[m/s]', UnMapped=None, fig=None, axe
 
     def modeStyle(i, lbl):
         lbl=lbl.lower().replace('_',' ')
+        lbl=lbl.replace(')','')
+        lbl=lbl.replace('(',' ')
         ms = 4
         c  = Colors[np.mod(i,len(Colors))]
         ls = LineStyles[np.mod(int(i/len(Markers)),len(LineStyles))]
         mk = Markers[np.mod(i,len(Markers))]
         # Color
-        if any([s in lbl for s in ['1st tower']]):
-            c=MW_Blue
-        elif any([s in lbl for s in ['2nd tower']]):
-            c=MW_Light_Blue
-        elif any([s in lbl for s in ['1st blade edge','drivetrain']]):
-            c=MW_Red
-        elif any([s in lbl for s in ['1st blade flap']]):
-            c=MW_Green
-        elif any([s in lbl for s in ['2nd blade flap']]):
-            c=MW_Light_Green
-        elif any([s in lbl for s in ['2nd blade edge']]):
-            c=MW_Light_Red
+        if any([s in lbl for s in ['1st tower fa', '2nd tower fa']]):
+            c=MW_Red;mk='s';ms=6
+        elif any([s in lbl for s in ['1st tower ss', '2nd tower ss']]):
+            c=MW_Blue;mk='d';ms=6
+        elif any([s in lbl for s in ['blade edge  regressive']]):
+            c='y'; mk='o'; ms=6;
+        elif any([s in lbl for s in ['blade edge  progressive']]):
+            c='c'; mk='+'; ms=6;
+        elif any([s in lbl for s in ['regressive']]):
+            c=MW_Green; mk='v'; ms=6;
+        elif any([s in lbl for s in ['collective']]):
+            c='brown'; mk='*'; ms=6;
+        elif any([s in lbl for s in ['progressive']]):
+            c='m'; mk='^'; ms=6;
+
         # Line style
-        if any([s in lbl for s in ['tower fa','collective','drivetrain']]):
-            ls='-'
-        elif any([s in lbl for s in ['tower ss','regressive']]):
+        # if any([s in lbl for s in ['tower fa','collective','drivetrain']]):
+        #     ls='-'
+        if any([s in lbl for s in ['2nd']]):
             ls='--'
-        elif any([s in lbl for s in ['tower ss','progressive']]):
-            ls='-.'
+        else:
+            ls='-'
+            
         # Marker
-        if any([s in lbl for s in ['collective']]):
-            mk='2'; ms=8
-        elif any([s in lbl for s in ['tower']]):
-            mk='1'; ms=8
-        elif any([s in lbl for s in ['blade']]):
-            mk='3'; ms=8
-        elif any([s in lbl for s in ['blade','tower','drivetrain']]):
-            mk=''; 
+        # if any([s in lbl for s in ['fa']]):
+        #     mk='s'; ms=4
+        # if any([s in lbl for s in ['ss']]):
+        #     mk='d'; ms=4
+        # elif any([s in lbl for s in ['regressive']]):
+        #     mk='v'; ms=6;
+        # elif any([s in lbl for s in ['collective']]):
+        #     mk='*'; ms=6;
+        # elif any([s in lbl for s in ['progressive']]):
+        #     mk='^'; ms=6;
+        # elif any([s in lbl for s in ['(collective)']]):
+        #     mk='^'; ms=8
+        # elif any([s in lbl for s in ['(progressive)']]):
+        #     mk='^'; ms=8
+        # elif any([s in lbl for s in ['collective']]):
+        #     mk='*'; ms=8
+        # elif any([s in lbl for s in ['blade','tower','drivetrain']]):
+        #     mk=''; 
         return c, ls, ms, mk
 
     # Init figure
