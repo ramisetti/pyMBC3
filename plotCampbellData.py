@@ -49,6 +49,8 @@ def plotCampbellData(OP, Freq, Damp, sx='WS_[m/s]', UnMapped=None, fig=None, axe
             c='brown'; mk='*'; ms=6;
         elif any([s in lbl for s in ['progressive']]):
             c='m'; mk='^'; ms=6;
+        elif any([s in lbl for s in ['1p', '3p','6p', '9p', '12p']]):
+            c='black';mk=''
 
         # Line style
         # if any([s in lbl for s in ['tower fa','collective','drivetrain']]):
@@ -88,7 +90,8 @@ def plotCampbellData(OP, Freq, Damp, sx='WS_[m/s]', UnMapped=None, fig=None, axe
         axes=axes_
 
     # Estimating figure range
-    FreqRange = [0                         , np.nanmax(Freq.iloc[:,:])*1.01]
+    #FreqRange = [0                         , np.nanmax(Freq.iloc[:,:])*1.01]
+    FreqRange = [0                         , 3.0]
     DampRange = [np.nanmin(Damp.iloc[:,2:]), np.nanmax(Damp.iloc[:,:])*1.01]
     if ylim is not None:
         FreqRange=ylim
