@@ -24,9 +24,7 @@ import matplotlib.pyplot as plt
 #FileNames=['DLC-1.1/5MW_Land_BD_Linear-7.1.lin', 'DLC-1.1/5MW_Land_BD_Linear-7.2.lin']
 #FileNames=['/Users/sramiset/Desktop/OpenFAST/5MW_Land_BD_Linear/5MW_Land_BD_Linear-1.1.lin','/Users/sramiset/Desktop/OpenFAST/5MW_Land_BD_Linear/5MW_Land_BD_Linear-1.2.lin']
 
-ext=os.path.splitext(os.path.basename(sys.argv[1]))[1]
-if ext!='.fst':
-    fileExcel=sys.argv[1]
+def readExcelData(fileExcel):
     xlFile = pd.ExcelFile(fileExcel)
     d = {} # dictionary to hold data from excel sheets
     for sheet in xlFile.sheet_names:
@@ -36,25 +34,50 @@ if ext!='.fst':
     OP=frequency[frequency.columns[0]].to_list()
     frequency=frequency.drop(frequency.columns[0],axis=1)
     frequency=frequency.drop(['1P','3P','6P','9P','12P'],axis=1)
-    
+
     dampratio=d['DampingRatios']
     dampratio=dampratio.drop(dampratio.columns[0],axis=1)
 
+    print(OP,frequency,dampratio)    
     pCD.plotCampbellData(OP,frequency,dampratio)
-    exit()
 
-def getFastFiles(templateFile):
+def getFastFiles(inputFile):
     FileNames=[]
-    base_tempFile=os.path.splitext(os.path.basename(templateFile))[0]
-    ext_tempFile=os.path.splitext(os.path.basename(templateFile))[1]
+
+    d = {}
+    with open(inputFile) as f:
+        for line in f:
+            if line.startswith('#') or line=='\n':
+                continue
+            line=line.strip() # remove whitespaces for each line  
+            line=line.split('#')[0] # ignore text after # character
+            key = line.split('=')[0] # split the line by = and take the first string as key
+            val = line.split('=')[1] # split the line by = and take the second string as value(s)
+            val = [x.strip() for x in val.split(',')]
+            d[key] = val
+            
+    #print (type(d['WindSpeed_[m/s]']))
+    inFile=d['InputFile'][0]
+    base_tempFile=os.path.splitext(os.path.basename(inFile))[0]
+    ext_tempFile=os.path.splitext(os.path.basename(inFile))[1]
+
+    print(ext_tempFile)
+    if(ext_tempFile=='.xlsx'):
+        if os.path.isfile(inFile):
+            readExcelData(inFile) # read campbell data from excel file and plot the campbell diagram
+        else:
+            print('Input Excel data file does not exist!')
+        exit()
 
     for file in glob.glob(base_tempFile+'-*'+ext_tempFile):
         FileNames.append(file)
     
         # sort filenames alphanumerically
         FileNames.sort()
-    return FileNames
 
+    OP=d['WindSpeed_[m/s]']
+    OP=[float(i) for i in OP]
+    return FileNames,OP
 
 def getScaleFactors(DescStates, TowerLen, BladeLen):
     
@@ -493,48 +516,12 @@ def runMBC(FileNames,NLinTimes=None):
 #FileNames=['5MW_Land_ModeShapes-0.fst','5MW_Land_ModeShapes-1.fst','5MW_Land_ModeShapes-2.fst','5MW_Land_ModeShapes-3.fst','5MW_Land_ModeShapes-4.fst','5MW_Land_ModeShapes-5.fst','5MW_Land_ModeShapes-6.fst','5MW_Land_ModeShapes-7.fst']
 # TO DO read x-axis for wind speed or rotor speed from csv file
 #op_csv=pd.read_csv('input.csv', sep=',')
-OP=[0,2,4,6,8,10,12,14]
-#OP=[0,2,4,6]
+#OP=[0,2,4,6,8,10,12,14]
+#OP=[4,6,8,10,12,14,16]
 
-TemplateFile=sys.argv[1]
-FileNames=getFastFiles(TemplateFile)
+# read wind/rotor speeds and fast linearization files from input file
+FileNames,OP=getFastFiles(sys.argv[1])
 CampbellData=runMBC(FileNames)
-
-# for debugging purpose
-tmpFreqFile="FreqHz.txt"
-tmpDampFile="DampingRatios.txt"
-maxsize=0
-for indx in range(len(CampbellData)):
-    tmp=CampbellData[indx]['NaturalFreq_Hz'].shape[0]
-    if (maxsize<tmp):
-        maxsize=tmp
-
-#print(maxsize)
-tmpFreq=np.empty([len(CampbellData),maxsize])
-tmpDamp=np.empty([len(CampbellData),maxsize])
-for indx in range(len(CampbellData)):
-    addsize=(maxsize-CampbellData[indx]['NaturalFreq_Hz'].shape[0])
-    a=CampbellData[indx]['NaturalFreq_Hz']
-    tmpArr=1E-10*np.ones(addsize)
-    a=np.append(tmpArr,a)
-    tmpFreq[indx,:]=a
-
-    addsize=(maxsize-CampbellData[indx]['DampingRatio'].shape[0])
-    tmpArr=1E-10*np.ones(addsize)
-    b=CampbellData[indx]['DampingRatio']
-    b=np.append(tmpArr,b)
-    tmpDamp[indx,:]=b
-
-with open(tmpFreqFile, "a") as f:
-    np.savetxt(f,tmpFreq,fmt='%g', delimiter=' ', newline=os.linesep)
-
-with open(tmpDampFile, "a") as f:
-    np.savetxt(f,tmpDamp,fmt='%g', delimiter=' ', newline=os.linesep)
-        
-# print(CampbellData[indx]['NaturalFreq_Hz'])
-# print(CampbellData[indx]['DampingRatio'])
-# end of debugging
-
 print('Preparing campbell diagram data!');
 
 #modeID_table,modesDesc=IdentifyModes(CampbellData)
@@ -546,7 +533,8 @@ modeID_table,modesDesc=IdentifyModes_v1(CampbellData)
 nModes=modeID_table.shape[0]
 nRuns=modeID_table.shape[1]
 cols=[item[0] for item in list(modesDesc.values())]
-#print(cols)
+print(cols)
+
 frequency=pd.DataFrame(np.nan, index=np.arange(nRuns), columns=cols)
 dampratio=pd.DataFrame(np.nan, index=np.arange(nRuns), columns=cols)
 FreqPlotData=np.zeros((nRuns,nModes))
@@ -592,7 +580,62 @@ for i in range(nRuns):
 # uncomment to write excel file with transposed frequency data
 #frequency.transpose().to_excel(r'CampbellData.xlsx')
 
+# dbgwriter = pd.ExcelWriter('CampbellTable.xlsx', engine='xlsxwriter')
+# dfggg = pd.DataFrame(CampbellData[0]['ModesTable'])
+# dfggg.to_excel(dbgwriter)
+# dbgwriter.save()
+
 writer = pd.ExcelWriter('CampbellData.xlsx', engine='xlsxwriter')
 frequency.to_excel(writer,sheet_name='FrequencyHz')
 dampratio.to_excel(writer,sheet_name='DampingRatios')
-writer.save()
+
+#writer.save()
+#exit()
+# for debugging purpose
+maxsize=0
+for indx in range(len(CampbellData)):
+    tmp=CampbellData[indx]['NaturalFreq_Hz'].shape[0]
+    print('Shape ', CampbellData[indx]['NaturalFreq_Hz'])
+    if (maxsize<tmp):
+        maxsize=tmp
+
+print('Debug Info: max number of DOFs ', maxsize)
+print('Len CampbellData', len(CampbellData))
+#tmpFreq=np.empty([len(CampbellData),maxsize])
+#tmpDamp=np.empty([len(CampbellData),maxsize])
+tmpFreq=pd.DataFrame(np.nan, index=np.arange(len(CampbellData)),columns=cols[0:maxsize])
+tmpDamp=pd.DataFrame(np.nan, index=np.arange(len(CampbellData)),columns=cols[0:maxsize])
+for indx in range(len(CampbellData)):
+    addsize=(maxsize-CampbellData[indx]['NaturalFreq_Hz'].shape[0])
+    a=CampbellData[indx]['NaturalFreq_Hz']
+    tmpArr=1E-10*np.ones(addsize)
+    print(addsize,tmpFreq.shape, a)
+    a=np.append(tmpArr,a)
+    tmpFreq.iloc[indx,:]=a
+
+    addsize=(maxsize-CampbellData[indx]['DampingRatio'].shape[0])
+    tmpArr=1E-10*np.ones(addsize)
+    b=CampbellData[indx]['DampingRatio']
+    b=np.append(tmpArr,b)
+    tmpDamp.iloc[indx,:]=b
+
+tmpFreq.to_excel(writer,sheet_name='SortedFreqHz')
+tmpDamp.to_excel(writer,sheet_name='SortedDampRatios')
+
+# tmpFreqFile="FreqHz.txt"
+# tmpDampFile="DampingRatios.txt"
+# with open(tmpFreqFile, "a") as f:
+#     np.savetxt(f,tmpFreq,fmt='%g', delimiter=' ', newline=os.linesep)
+
+# with open(tmpDampFile, "a") as f:
+#     np.savetxt(f,tmpDamp,fmt='%g', delimiter=' ', newline=os.linesep)
+        
+# print(CampbellData[indx]['NaturalFreq_Hz'])
+# print(CampbellData[indx]['DampingRatio'])
+# end of debugging
+
+
+# save to excel file and close
+writer.save() 
+
+#End of script

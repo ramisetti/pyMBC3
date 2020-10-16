@@ -216,7 +216,7 @@ def getStateOrderingIndx(matData):
         StateOrderingIndx[indx_start:(indx_start+mod_nDOFs)] = sum_nDOFs2 + np.arange(0,mod_nDOFs); # q2 starts at 1
         StateOrderingIndx[(indx_start+mod_nDOFs):matData['NumStates']]        = sum_nDOFs2 + matData['ndof2'] + np.arange(0,mod_nDOFs); # q2_dot starts at matData.ndof2 + 1
     else:
-        StateOrderingIndx[indx_start:(indx_start+mod_nDOFs)] = sum_nDOFs1 + matData['NumStates2'] + np.arrange(0,mod_nDOFs); # q1 starts at matData.NumStates2 + 1
+        StateOrderingIndx[indx_start:(indx_start+mod_nDOFs)] = sum_nDOFs1 + matData['NumStates2'] + np.arange(0,mod_nDOFs); # q1 starts at matData.NumStates2 + 1
 
     #print(StateOrderingIndx)
     return StateOrderingIndx, checkEDstates
