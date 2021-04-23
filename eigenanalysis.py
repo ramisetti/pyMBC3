@@ -119,15 +119,6 @@ def eiganalysis(A, ndof2, ndof1):
     mbc['MagnitudeModes']  = np.abs(mbc['EigenVects']);
     mbc['PhaseModes_deg']  = np.angle(mbc['EigenVects'])*180.0/np.pi;
 
-    # print(real_Evals[0:10])
-    # print(imag_Evals[0:10])
-    # print(mbc['NaturalFrequencies'][0:10])
-    # print(mbc['DampRatios'][0:10])
-    # print(mbc['NaturalFreqs_Hz'][0:10])
-    # print(mbc['DampedFreqs_Hz'][0:10])
-    # print(mbc['MagnitudeModes'].shape)
-    # print(mbc['PhaseModes_deg'][0,0])
-
     # with open('MagModes.txt', "a") as f:
     #     np.savetxt(f,mbc['MagnitudeModes'],fmt='%g')
     #     f.write('\n')
@@ -151,9 +142,6 @@ def eiganalysis(A, ndof2, ndof1):
 def fx_mbc3(FileNames):
     MBC={}
     matData, FAST_linData = gm.get_Mats(FileNames)
-
-    # print('matData[Omega] ', matData['Omega'])
-    # print('matData[OmegaDot] ', matData['OmegaDot'])
     
     MBC['DescStates'] = matData['DescStates'] # save this in the MBC type for possible campbell_diagram processing later 
     MBC['ndof2'] = matData['ndof2']
@@ -162,20 +150,11 @@ def fx_mbc3(FileNames):
     
     if 'WindSpeed' in matData:
         MBC['WindSpeed'] = np.mean(matData['WindSpeed'])
-        
-    # print('RotSpeed_rpm ',MBC['RotSpeed_rpm'])
-    # print('ndof1 ', MBC['ndof1'])
-    # print('ndof2 ', MBC['ndof2'])
-    # print(matData['RotTripletIndicesStates2'])
-    
+            
     #  nb = 3; % number of blades required for MBC3
     # ---------- Multi-Blade-Coordinate transformation -------------------------------------------
     new_seq_dof2, dummy, nb = get_new_seq(matData['RotTripletIndicesStates2'],matData['ndof2']); # these are the first ndof2 states (not "first time derivative" states); these values are used to calculate matrix transformations
     new_seq_dof1, dummy, dummy = get_new_seq(matData['RotTripletIndicesStates1'],matData['ndof1']); # these are the first-order ndof1 states; these values are used to calculate matrix transformations
-
-    # print('new_seq_dof2 ', new_seq_dof2)
-    # print('new_seq_dof1 ', new_seq_dof1)
-    # print('dummy ', dummy, ' nb ', nb)
 
     new_seq_states=np.concatenate((new_seq_dof2, new_seq_dof2+matData['ndof2']))
     if new_seq_dof1.size!=0:
