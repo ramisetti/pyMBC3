@@ -17,134 +17,13 @@ import eigenanalysis as eigAnl
 import matplotlib.pyplot as plt
 import openpyxl, csv
 
-#FileNames=['5MW_Land_ModeShapes-1.fst', '5MW_Land_ModeShapes-2.fst', '5MW_Land_ModeShapes-3.fst', '5MW_Land_ModeShapes-6.fst', '5MW_Land_ModeShapes-7.fst'];
-#FileNames=['5MW_Land_BD_Linear-1.fst', '5MW_Land_BD_Linear-2.fst', '5MW_Land_BD_Linear-3.fst', '5MW_Land_BD_Linear-6.fst', '5MW_Land_BD_Linear-7.fst'];
-
-#FileNames=['5MW_Land_BD_Linear-1.fst'];
-
-#FileNames=['DLC-1.1/5MW_Land_BD_Linear-7.1.lin', 'DLC-1.1/5MW_Land_BD_Linear-7.2.lin']
-#FileNames=['/Users/sramiset/Desktop/OpenFAST/5MW_Land_BD_Linear/5MW_Land_BD_Linear-1.1.lin','/Users/sramiset/Desktop/OpenFAST/5MW_Land_BD_Linear/5MW_Land_BD_Linear-1.2.lin']
-
-def writeExcelData(MBC_data,OP,BladeLen,TowerHt):
+def writeExcelData(MBC_data,OP,BladeLen,TowerHt,Pltform=False):
     StartRow=48
     StartCol_Magnitude=5
     StartCol_Phase=35
     Col_CD=3
 
-    wb = openpyxl.load_workbook('/Users/sramiset/Desktop/OpenFAST/pyMBC3/CampbellDiagram_Template_v1-FFF.xlsm',read_only=False, keep_vba= True) # open the excel workbook with  macros
-
-    for (MBC,speed) in zip(MBC_data, OP):        
-        NROWS=MBC['eigSol']['NaturalFreqs_Hz'].shape[0]
-        NCOLS=MBC['eigSol']['NaturalFreqs_Hz'].shape[0]
-
-        if(NROWS>28):
-            NROWS=28
-            NCOLS=28
-
-        count=0
-        # indx=[]
-        # for r in range(0,NROWS):
-        #     if( 'platform' in MBC['DescStates'][r].lower() ):
-        #         count=count+1
-        #     else:
-        #         indx.append(r)
-        # print(indx)
-        # print(count)
-        
-        # NROWS=NROWS-count
-        # NCOLS=NCOLS-count
-        ndof = MBC['ndof2'] + MBC['ndof1']; #size(MBC.AvgA,1)/2;          # number of translational states
-        nModes = len(MBC['eigSol']['Evals'])
-        #print(nModes)
-        DescStates = PrettyStateDescriptions(MBC['DescStates'], MBC['ndof2'], MBC['performedTransformation']);
-        #print(type(DescStates), type(MBC['DescStates'][0]))
-
-        #print(MBC['eigSol']['DampedFreqs_Hz'])
-        #print(MBC['eigSol']['MagnitudeModes'])
-        #print(MBC['eigSol']['MagnitudeModes'][0])
-
-        DampRatios=MBC['eigSol']['DampRatios'][:-count]
-        DampFreq_Hz=MBC['eigSol']['DampedFreqs_Hz'][:-count]
-        NaturalFreq_Hz=MBC['eigSol']['NaturalFreqs_Hz'][:-count]
-        
-        
-        fst_tower_fa_ind = [i for i, x in enumerate(DescStates) if "tower" in x and "1st" in x and "fore-aft" in x]
-        fst_tower_ss_ind = [i for i, x in enumerate(DescStates) if "tower" in x and "1st" in x and "side-to-side" in x]
-        snd_tower_fa_ind = [i for i, x in enumerate(DescStates) if "tower" in x and "2nd" in x and "fore-aft" in x]
-        snd_tower_ss_ind = [i for i, x in enumerate(DescStates) if "tower" in x and "2nd" in x and "side-to-side" in x]
-        fst_tower_fa_ind[0]=fst_tower_fa_ind[0]+11
-        fst_tower_ss_ind[0]=fst_tower_ss_ind[0]+11
-        snd_tower_fa_ind[0]=snd_tower_fa_ind[0]+11
-        snd_tower_ss_ind[0]=snd_tower_ss_ind[0]+11
-
-        #print(fst_tower_ss_ind[0], fst_tower_fa_ind[0], snd_tower_ss_ind[0], snd_tower_fa_ind[0])
-        fst_fw_blade_reg_ind = snd_tower_ss_ind[0]+2
-        fst_fw_blade_col_ind = snd_tower_ss_ind[0]+3
-        fst_fw_blade_pro_ind = snd_tower_ss_ind[0]+4
-        fst_ew_blade_reg_ind = snd_tower_ss_ind[0]+5
-        fst_ew_blade_col_ind = snd_tower_ss_ind[0]+6
-        fst_ew_blade_pro_ind = snd_tower_ss_ind[0]+7
-        snd_fw_blade_reg_ind = snd_tower_ss_ind[0]+8
-        snd_fw_blade_col_ind = snd_tower_ss_ind[0]+9
-        snd_fw_blade_pro_ind = snd_tower_ss_ind[0]+10
-
-        ## get the scaling factors for the mode rows
-        ScalingFactor = getScaleFactors(DescStates, TowerHt, BladeLen);
-
-        if int(speed)%2 == 0:
-            ws_CD = wb['CampbellDiagram']
-            
-            ws_CD.cell(row=4,column=Col_CD).value="='"+str(int(speed))+" RPM'"+'!$BO'+str(fst_tower_fa_ind[0])
-            ws_CD.cell(row=5,column=Col_CD).value="='"+str(int(speed))+" RPM'"+'!$BO'+str(fst_tower_ss_ind[0])
-            ws_CD.cell(row=6,column=Col_CD).value="='"+str(int(speed))+" RPM'"+'!$BO'+str(snd_tower_fa_ind[0])
-            ws_CD.cell(row=7,column=Col_CD).value="='"+str(int(speed))+" RPM'"+'!$BO'+str(snd_tower_ss_ind[0])
-            ws_CD.cell(row=8,column=Col_CD).value="='"+str(int(speed))+" RPM'"+'!$BO'+str(fst_fw_blade_reg_ind)
-            ws_CD.cell(row=9,column=Col_CD).value="='"+str(int(speed))+" RPM'"+'!$BO'+str(fst_fw_blade_col_ind)
-            ws_CD.cell(row=10,column=Col_CD).value="='"+str(int(speed))+" RPM'"+'!$BO'+str(fst_fw_blade_pro_ind)
-            ws_CD.cell(row=11,column=Col_CD).value="='"+str(int(speed))+" RPM'"+'!$BO'+str(fst_ew_blade_reg_ind)
-            ws_CD.cell(row=12,column=Col_CD).value="='"+str(int(speed))+" RPM'"+'!$BO'+str(fst_ew_blade_pro_ind)
-            ws_CD.cell(row=13,column=Col_CD).value="='"+str(int(speed))+" RPM'"+'!$BO'+str(snd_fw_blade_reg_ind)
-            ws_CD.cell(row=14,column=Col_CD).value="='"+str(int(speed))+" RPM'"+'!$BO'+str(snd_fw_blade_col_ind)
-            #ws_CD.cell(row=15,column=Col_CD).value="='"+str(int(speed))+" RPM'"+'!$BO'+str(snd_fw_blade_pro_ind)
-            Col_CD=Col_CD+1
-        
-
-        if str(int(speed))+' RPM' in wb.sheetnames:
-            ws = wb[str(int(speed))+' RPM']
-
-            # insert blade length and tower height
-            ws.cell(row=4, column=5).value=BladeLen
-            ws.cell(row=4, column=7).value=TowerHt
-            for r in range(NROWS):
-                ws.cell(row=11+r-count, column=3).value=MBC['DescStates'][r]
-                ws.cell(row=11+r-count, column=4).value=ScalingFactor[r]
-                
-            # insert natural frequencies, damping ratios, and damped frequencies
-            for r in range(NROWS):
-                #if( MBC['DescStates'][r].find('platform')=-1 ):
-                ws.cell(row=StartRow+r-count, column=65).value=MBC['eigSol']['DampRatios'][r-count][0]
-                ws.cell(row=StartRow+r-count, column=66).value=MBC['eigSol']['DampedFreqs_Hz'][r-count][0]
-                ws.cell(row=StartRow+r-count, column=67).value=MBC['eigSol']['NaturalFreqs_Hz'][r-count][0]
-
-                #for r in range(0,MBC['eigSol']['MagnitudeModes'].shape[0]):
-                for r in range(NROWS):
-                    #if( MBC['DescStates'][r].find('platform') =-1 ):
-                    for c in range(NCOLS):
-                        ws.cell(row=StartRow+r-count, column=StartCol_Magnitude+c).value=MBC['eigSol']['MagnitudeModes'][r-count][c]
-                        ws.cell(row=StartRow+r-count, column=StartCol_Phase+c).value=MBC['eigSol']['PhaseModes_deg'][r-count][c]
-        else:
-            print("The worksheet '{}' does not exist in the template workbook".format(str(int(speed))+' RPM'))
-
-        wb.save('newfile.xlsm') #save it as a new file with macros enables
-
-
-def writeExcelDataPlf(MBC_data,OP,BladeLen,TowerHt,Pltform=False):
-    StartRow=48
-    StartCol_Magnitude=5
-    StartCol_Phase=35
-    Col_CD=3
-
-    wb = openpyxl.load_workbook('/Users/sramiset/Desktop/OpenFAST/pyMBC3/CampbellDiagram_Template_v1-FFF.xlsm',read_only=False, keep_vba= True) # open the excel workbook with  macros
+    wb = openpyxl.load_workbook('CampbellDiagram_Template_v1-FFF.xlsm',read_only=False, keep_vba= True) # open the excel workbook with  macros
 
     for (MBC,speed) in zip(MBC_data, OP):        
         NROWS=MBC['eigSol']['NaturalFreqs_Hz'].shape[0]
@@ -165,13 +44,6 @@ def writeExcelDataPlf(MBC_data,OP,BladeLen,TowerHt,Pltform=False):
         else:
             DescStates=MBC['DescStates']
 
-        # NROWS=NROWS-count
-        # NCOLS=NCOLS-count
-        # ndof = MBC['ndof2'] + MBC['ndof1']; #size(MBC.AvgA,1)/2;          # number of translational states
-        # nModes = len(MBC['eigSol']['Evals'])
-        #print(nModes)
-        #DescStates = PrettyStateDescriptions(MBC['DescStates'], MBC['ndof2'], MBC['performedTransformation']);
-
         DampRatios=MBC['eigSol']['DampRatios'][:-count]
         DampFreq_Hz=MBC['eigSol']['DampedFreqs_Hz'][:-count]
         NaturalFreq_Hz=MBC['eigSol']['NaturalFreqs_Hz'][:-count]
@@ -213,7 +85,7 @@ def writeExcelDataPlf(MBC_data,OP,BladeLen,TowerHt,Pltform=False):
             ws_CD.cell(row=12,column=Col_CD).value="='"+str(int(speed))+" RPM'"+'!$BO'+str(fst_ew_blade_pro_ind)
             ws_CD.cell(row=13,column=Col_CD).value="='"+str(int(speed))+" RPM'"+'!$BO'+str(snd_fw_blade_reg_ind)
             ws_CD.cell(row=14,column=Col_CD).value="='"+str(int(speed))+" RPM'"+'!$BO'+str(snd_fw_blade_col_ind)
-            #ws_CD.cell(row=15,column=Col_CD).value="='"+str(int(speed))+" RPM'"+'!$BO'+str(snd_fw_blade_pro_ind)
+            ws_CD.cell(row=15,column=Col_CD).value="='"+str(int(speed))+" RPM'"+'!$BO'+str(snd_fw_blade_pro_ind)
             Col_CD=Col_CD+1
 
             
@@ -231,14 +103,11 @@ def writeExcelDataPlf(MBC_data,OP,BladeLen,TowerHt,Pltform=False):
                 
             # insert natural frequencies, damping ratios, and damped frequencies
             for r in range(NR):
-                #if( MBC['DescStates'][r].find('platform')=-1 ):
                 ws.cell(row=StartRow+r, column=65).value=MBC['eigSol']['DampRatios'][r][0]
                 ws.cell(row=StartRow+r, column=66).value=MBC['eigSol']['DampedFreqs_Hz'][r][0]
                 ws.cell(row=StartRow+r, column=67).value=MBC['eigSol']['NaturalFreqs_Hz'][r][0]
 
-                #for r in range(0,MBC['eigSol']['MagnitudeModes'].shape[0]):
                 for r in range(NR):
-                    #if( MBC['DescStates'][r].find('platform') =-1 ):
                     for c in range(NC):
                         ws.cell(row=StartRow+r, column=StartCol_Magnitude+c).value=MBC['eigSol']['MagnitudeModes'][r][c]
                         ws.cell(row=StartRow+r, column=StartCol_Phase+c).value=MBC['eigSol']['PhaseModes_deg'][r][c]
@@ -281,7 +150,6 @@ def getFastFiles(inputFile):
             val = [x.strip() for x in val.split(',')]
             d[key] = val
             
-    #print (type(d['WindSpeed_[m/s]']))
     inFile=d['InputFile'][0]
     base_tempFile=os.path.splitext(os.path.basename(inFile))[0]
     ext_tempFile=os.path.splitext(os.path.basename(inFile))[1]
@@ -301,10 +169,8 @@ def getFastFiles(inputFile):
         FileNames.append(file)
     
     # sort filenames alphanumerically
-    #FileNames.sort()
     FileNames.sort(key=lambda f: int(re.sub('\D', '', f)))
     
-    #exit()
     PltForm=False
     if "Platform" in d:
         if d['Platform'][0] == 'True':
@@ -314,8 +180,6 @@ def getFastFiles(inputFile):
     
     OP=d['WindSpeed_[m/s]']
     OP=[float(i) for i in OP]
-
-        
     return FileNames[0:len(OP)],OP,PltForm
 
 def getScaleFactors(DescStates, TowerLen, BladeLen):
@@ -330,13 +194,12 @@ def getScaleFactors(DescStates, TowerLen, BladeLen):
         if DescStates[i].find('blade')!=-1 or DescStates[i].find('Blade')!=-1:
            if DescStates[i].find('rotational')==-1: # make sure this isn't a rotational dof from BeamDyn
                ScalingFactor[i] = 1.0/BladeLen;
-               #print(DescStates[i])
                
-            # look for tower translational dofs:
+        # look for tower translational dofs:
         if DescStates[i].find('tower')!=-1 or DescStates[i].find('Tower')!=-1:
             ScalingFactor[i] = 1.0/TowerLen;
 
-            # look for blade dofs:
+        # look for blade dofs:
         elif DescStates[i].find('blade')!=-1 or DescStates[i].find('Blade')!=-1:
             if DescStates[i].find('rotational')==-1: # make sure this isn't a rotational dof from BeamDyn
                 ScalingFactor[i] =  1.0/BladeLen;
@@ -345,101 +208,6 @@ def getScaleFactors(DescStates, TowerLen, BladeLen):
 
 
 def IdentifyModes(CampbellData):
-    modesDesc = {}
-    #modesDesc[0]=['Generator DOF (not shown)'     , 'ED Variable speed generator DOF, rad']
-    modesDesc[0]=['1st Tower FA'                  , 'ED 1st tower fore-aft bending mode DOF, m']
-    modesDesc[1]=['1st Tower SS'                  , 'ED 1st tower side-to-side bending mode DOF, m']
-    modesDesc[2]=['1st Blade Flap (Regressive)'   , 'ED 1st flapwise bending-mode DOF of blade (sine|cosine), m', 'Blade (sine|cosine) finite element node \d rotational displacement in Y, rad']
-    modesDesc[3]=['1st Blade Flap (Collective)'   , 'ED 1st flapwise bending-mode DOF of blade collective, m', 'Blade collective finite element node \d rotational displacement in Y, rad']
-    modesDesc[4]=['1st Blade Flap (Progressive)'  , 'ED 1st flapwise bending-mode DOF of blade (sine|cosine), m'] # , ...# 'Blade (sine|cosine) finite element node \d rotational displacement in Y, rad']
-    modesDesc[5]=['1st Blade Edge (Regressive)'   , 'ED 1st edgewise bending-mode DOF of blade (sine|cosine), m', 'Blade (sine|cosine) finite element node \d rotational displacement in X, rad']
-    modesDesc[6]=['1st Blade Edge (Progressive)'  , 'ED 1st edgewise bending-mode DOF of blade (sine|cosine), m']
-    modesDesc[7]=['1st Drivetrain Torsion'        , 'ED Drivetrain rotational-flexibility DOF, rad']
-    modesDesc[8]=['2nd Tower FA'                  , 'ED 2nd tower fore-aft bending mode DOF, m']
-    modesDesc[9]=['2nd Tower SS'                  , 'ED 2nd tower side-to-side bending mode DOF, m']
-    modesDesc[10]=['2nd Blade Flap (Regressive)'   , 'ED 2nd flapwise bending-mode DOF of blade (sine|cosine), m']
-    modesDesc[11]=['2nd Blade Flap (Collective)'   , 'ED 2nd flapwise bending-mode DOF of blade collective, m', 'Blade collective finite element node \d rotational displacement in Y, rad']
-    modesDesc[12]=['2nd Blade Flap (Progressive)'  , 'ED 2nd flapwise bending-mode DOF of blade (sine|cosine), m'] 
-    #modesDesc[14]=['Nacelle Yaw (not shown)'  , 'ED Nacelle yaw DOF, rad']
-
-    nModes = int(len(modesDesc))
-    nRuns = int(len(CampbellData))
-    #modesIdentified = np.zeros(nRuns,dtype=bool)
-    modesIdentified={}
-    modeID_table=np.zeros((nModes,nRuns))
-
-    # for i in range(nModes):
-    #     print(CampbellData[0]['Modes'][i]['NaturalFreq_Hz'])
-
-    # print('----')
-    # for i in range(nModes):
-    #     print(CampbellData[1]['Modes'][i]['NaturalFreq_Hz'])
-
-    for i in range(nRuns):
-        res =  [False for j in range(len(CampbellData[i]['Modes']))]
-        modesIdentified[i] = res
-
-        #print(' MODES IDENTIFIED ', modesIdentified,len(modesDesc))
-    
-        for modeID in range(1,len(modesDesc)): # list of modes we want to identify
-            found = False;
-            
-            if ( len(modesDesc[modeID][1])==0 ): 
-                continue;
-        
-            tryNumber = 0;
-            
-            #print(' FOUND , Trynumber ', found, tryNumber)
-            while not found and tryNumber <= 2:
-                m = 0;
-                while not found and m < len(modesIdentified[i]):
-                    m = m + 1;
-                    if modesIdentified[i][m-1] or CampbellData[i]['Modes'][m-1]['NaturalFreq_Hz'] < 0.1: # already identified this mode
-                        continue;
-
-                    #print(' NF ', i, m, CampbellData[i]['Modes'][m]['NaturalFreq_Hz'])
-
-                    if tryNumber == 0:
-                        stateMax=np.argwhere((CampbellData[i]['Modes'][m-1]['StateHasMaxAtThisMode']==1))
-                        #print(' FF ',i,m,len(stateMax),type(stateMax))
-
-                        maxDesc=[CampbellData[i]['Modes'][m-1]['DescStates'][smIndx] for smIndx in stateMax.flatten()]
-                        #print(' TR0 sM ',i, m , tryNumber, len(maxDesc), maxDesc)
-                        #maxDesc = CampbellData[i]['Modes'][m]['DescStates'][stateMaxIndx]
-
-                        if len(maxDesc)==0:
-                            tryNumber = tryNumber + 1;
-                
-                    if tryNumber > 0:
-                        if tryNumber < len(CampbellData[i]['Modes'][m-1]['DescStates']):
-                            stateMax=np.argwhere((CampbellData[i]['Modes'][m-1]['StateHasMaxAtThisMode']==0))
-
-                            maxDesc=[CampbellData[i]['Modes'][m-1]['DescStates'][smIndx] for smIndx in stateMax.flatten()]
-                            #print(' TY1 sM ',i, m , tryNumber, len(maxDesc))
-                        
-                            #maxDesc = CampbellData[i]['Modes'][m]['DescStates'][~CampbellData[i]['Modes'][m]['StateHasMaxAtThisMode']]
-                            #print(maxDesc)
-                        else:
-                            maxDesc = [];
-                    
-                    j = 0;
-                    while not found and j < len(maxDesc):
-                        j = j + 1;
-                        #print(' GGG00 ',j, len(modesDesc[modeID]))
-                        for iExp in range(1,len(modesDesc[modeID])):
-                            #print(' GGG0 ',iExp)
-                            if re.search(modesDesc[modeID][iExp],maxDesc[j-1],re.IGNORECASE)!=None:
-                                modesIdentified[i][m-1] = True;
-                                #print(' GGG1 ',i,j,m, modeID, iExp, tryNumber, maxDesc[j-1], len(maxDesc))
-                                modeID_table[modeID,i] = m-1
-                                found = True;
-                                break;
-                tryNumber = tryNumber + 1;
-
-    return modeID_table,modesDesc
-
-
-def IdentifyModes_v1(CampbellData):
     modesDesc = {}
     modesDesc[0]=['Generator DOF (not shown)'     , 'ED Variable speed generator DOF, rad']
     modesDesc[1]=['1st Tower FA'                  , 'ED 1st tower fore-aft bending mode DOF, m']
@@ -462,15 +230,7 @@ def IdentifyModes_v1(CampbellData):
     #modesIdentified = np.zeros(nRuns,dtype=bool)
     modesIdentified={}
     modeID_table=np.zeros((nModes,nRuns))
-    #print(nModes, nRuns)
     
-    # for i in range(nModes):
-    #     print(CampbellData[0]['Modes'][i]['NaturalFreq_Hz'])
-
-    # print('----')
-    # for i in range(nModes):
-    #     print(CampbellData[1]['Modes'][i]['NaturalFreq_Hz'])
-
     for i in range(nRuns):
         res =  [False for i in range(len(CampbellData[i]['Modes']))]
         modesIdentified[i] = res
@@ -756,42 +516,6 @@ def runMBC(FileNames,NLinTimes=None):
             print('Processing ', FileNames[i], ' file!', '   number of Linearization files to process ', NLinTimes)
             MBC_data,getMatData,FAST_linData=eigAnl.fx_mbc3(linFileNames)
             MBCData.append(MBC_data)
-            # print(MBC_data['eigSol']['MagnitudeModes'].shape)
-
-            # ndof = MBC_data['ndof2'] + MBC_data['ndof1']; #size(mbc_data.AvgA,1)/2;          # number of translational states
-            # nModes = len(MBC_data['eigSol']['Evals'])                                                                                                                 
-            # DescStates = PrettyStateDescriptions(MBC_data['DescStates'], MBC_data['ndof2'], MBC_data['performedTransformation']);
-            # ScalingFactor = getScaleFactors(DescStates, TowerHt, BladeLen);
-
-            # SortedFreqIndx = np.argsort((MBC_data['eigSol']['NaturalFreqs_Hz']).flatten(),kind="heapsort");
-            # print(ScalingFactor.shape)
-            # ## scale the magnitude of the modes by ScalingFactor (for consistent units)                                                                                      
-	    # #  and then scale the columns so that their maximum is 1                                                                                                         
-            # MBC_SORTED = np.matmul(np.diag(ScalingFactor), MBC_data['eigSol']['MagnitudeModes']); # scale the rows
-            # BBN=MBC_SORTED[:,SortedFreqIndx]
-            # np.savetxt("foo.csv", MBC_SORTED, delimiter=",")
-            # Rows=np.argmax(BBN,axis=1)
-            # Cols=np.argmax(BBN,axis=0)
-            # print('Rows: ', Rows)
-            # print('Cols: ', Cols)
-            # res_set = set() 
-            # res = [] 
-            # for idx, val in enumerate(Rows): 
-            #     if val not in res_set: 
-            #         res_set.add(val)          
-            #     else: 
-            #         res.append(idx)
-            # #print(res)
-            # for row in res:
-            #     print(row, ": ",np.where(Cols==row))
-            #     l1=np.where(Cols==row)
-            #     l1=np.asarray(l1).flatten()
-            #     l2=Rows[:row]
-            #     for ii in l1:
-            #         if np.count_nonzero(l2==ii)<1:
-            #             col_id=ii
-            #     #print('CID : ',col_id)
-
             print('Multi-Blade Coordinate transformation completed!');
             print('  ');
             CampbellData[indx]=campbell_diagram_data(MBC_data,BladeLen,TowerHt)
@@ -799,23 +523,14 @@ def runMBC(FileNames,NLinTimes=None):
 
     return CampbellData, MBCData, BladeLen, TowerHt
 
-
-#FileNames=['5MW_Land_ModeShapes-0.fst','5MW_Land_ModeShapes-1.fst','5MW_Land_ModeShapes-2.fst','5MW_Land_ModeShapes-3.fst','5MW_Land_ModeShapes-4.fst','5MW_Land_ModeShapes-5.fst','5MW_Land_ModeShapes-6.fst','5MW_Land_ModeShapes-7.fst']
-# TO DO read x-axis for wind speed or rotor speed from csv file
-#op_csv=pd.read_csv('input.csv', sep=',')
-#OP=[0,2,4,6,8,10,12,14]
-#OP=[4,6,8,10,12,14,16]
-
 # read wind/rotor speeds and fast linearization files from input file
 FileNames,OP,PltForm=getFastFiles(sys.argv[1])
 CampbellData,MBC_Data,BladeLen,TowerHt=runMBC(FileNames)
 print('Preparing campbell diagram data!');
 
-writeExcelData(MBC_Data,OP,BladeLen,TowerHt);
 writeExcelDataPlf(MBC_Data,OP,BladeLen,TowerHt,PltForm);
 
-#modeID_table,modesDesc=IdentifyModes(CampbellData)
-modeID_table,modesDesc=IdentifyModes_v1(CampbellData)
+modeID_table,modesDesc=IdentifyModes(CampbellData)
 
 print(modeID_table,len(OP))
 nModes=modeID_table.shape[0]
@@ -825,7 +540,7 @@ cols=[item[0] for item in list(modesDesc.values())]
 frequency=pd.DataFrame(np.nan, index=np.arange(nRuns), columns=cols)
 dampratio=pd.DataFrame(np.nan, index=np.arange(nRuns), columns=cols)
 print(nRuns,nModes)
-#exit()
+
 FreqPlotData=np.zeros((nRuns,nModes))
 DampPlotData=np.zeros((nRuns,nModes))
 for i in range(nRuns):

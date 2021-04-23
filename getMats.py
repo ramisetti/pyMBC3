@@ -49,7 +49,7 @@ def findBladeTriplets_EDstate(rotFrame,Desc):
                             NTriplets = NTriplets + 1;   # this  is  the number  of  state triplets in the rotating frame 
                             Triplets.append(Tmp); # these are the indices for state triplets in the rotating frame
                             break
-    #print(' FFFF ',Triplets, NTriplets)
+
     return Triplets,NTriplets;
 
 
@@ -61,9 +61,6 @@ def findBladeTriplets(rotFrame,Desc):
     NTriplets = 0;              # first initialize to zero
     Triplets = [];
     for i in range(len(rotFrame)):  # loop through inputs/outputs
-    #for i in range(7):
-        #if(i>=67):
-            #print(rotFrame[i])
         if rotFrame[i]:          # this is in the rotating frame
             Tmp = -1*np.ones(3);
             foundTriplet = False;
@@ -77,8 +74,6 @@ def findBladeTriplets(rotFrame,Desc):
                     # create another regular expression to find the
                     # exact match on a different blade:
                     strng = re.split(Bldstr,Desc[i],1); #this should return the strings before and after the match
-                    #print(strng[1])
-
                     
                     FirstStr = strng[0] + Bldstr[:len(Bldstr)-1] + '.'
                     checkThisStr = FirstStr + strng[1]
@@ -88,10 +83,7 @@ def findBladeTriplets(rotFrame,Desc):
                     checkThisStr=checkThisStr.replace(')','\)').replace('(', '\(').replace('^','\^')
 
                     k = int(Bldstr[len(Bldstr)-1])
-                    #print(Bldstr[len(Bldstr)-1], checkThisStr)
                     Tmp[k-1] = int(i);
-                    #print(Tmp,k,i,len(rotFrame),foundIt)
-                    #exit()
                     break
 
                 #print(Tmp,j)
@@ -141,9 +133,7 @@ def reOrderByIdx_1D(arry,Indi):
     return tmp
 
 def reOrderByIdx_2D(arry,Indi,Indj):
-    #tmp=[[None]*arry.shape[0]]*arry.shape[1]
     tmp=np.empty((arry.shape[0], arry.shape[1])) 
-    #print(arry.shape, len(Indi), len(Indj))
     if arry.shape[0]!= len(Indi):
         Indi=np.arange(0,arry.shape[0])
     if arry.shape[1]!= len(Indj):
@@ -161,7 +151,6 @@ def reOrderByIdx_2D(arry,Indi,Indj):
 
 def getStateOrderingIndx(matData):
 
-    #StateOrderingIndx={}
     StateOrderingIndx = np.arange(0,matData['NumStates'])
     lastModName = '';
     checkEDstates = True;
@@ -176,7 +165,6 @@ def getStateOrderingIndx(matData):
         tmp=(matData['DescStates'][i]); # name of the module whose states we are looking at
         modName = tmp.split(' ')[0]
 
-        #print('indx ', i)
         # ED has the blade number in the state description twice, so we
         # have to check the strings differently. We'll check here if a  
         # different module is used for the blade DOFs:
@@ -273,7 +261,6 @@ def ReadFASTLinear(filename):
             info['description'] = header[4].strip()
 
             ln=7;
-            #data = np.array([line.split() for line in f.readlines()]).astype(np.float)
             data['t']=np.float(header[ln].split(':')[1].strip().split(' ')[0])
             data['RotSpeed']=np.float(header[ln+1].split(':')[1].strip().split(' ')[0])
             data['Azimuth']=np.float(header[ln+2].split(':')[1].strip().split(' ')[0])
@@ -292,10 +279,6 @@ def ReadFASTLinear(filename):
             # skip next three lines
             for line in islice(f,4):
                 pass
-            
-            #ln=ln+9+3
-
-            #header = [f.readline() for _ in range(ln,3)]
             
             if data['n_x'] > 0:
                 temp=readLinTable(f,int(data['n_x']))
@@ -543,30 +526,3 @@ def get_Mats(FileNames):
         matData['n_RotTripletOutputs'] = 0;
         
     return matData, data
-
-#matData,FAST_linData=get_Mats(FileNames)
-
-#print("\n".join(matData['DescStates']))
-                                      
-# print(info)
-# print(data['t'])
-# print(data['RotSpeed'])
-# print(data['Azimuth'])
-# print(data['WindSpeed'])
-# print(data['n_x'])
-# print(data['n_xd'])
-# print(data['n_z'])
-# print(data['n_u'])
-# print(data['n_y'])
-# print(data['n_x2'])
-# print(data['x_op'])
-# print(data['x_desc'])
-# print(data['x_rotFrame'])
-# print(data['xdot_op'])
-# print(data['xdot_desc'])
-# print(data['u_op'])
-# print(data['u_desc'])
-# print(data['u_rotFrame'])
-# print(data['y_op'])
-# print(data['y_desc'])
-# print(data['y_rotFrame'])
