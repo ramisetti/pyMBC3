@@ -49,7 +49,7 @@ def findBladeTriplets_EDstate(rotFrame,Desc):
                             NTriplets = NTriplets + 1;   # this  is  the number  of  state triplets in the rotating frame 
                             Triplets.append(Tmp); # these are the indices for state triplets in the rotating frame
                             break
-    
+    #print(' FFFF ',Triplets, NTriplets)
     return Triplets,NTriplets;
 
 
@@ -392,6 +392,7 @@ def get_Mats(FileNames):
     matData['NumInputs']       = int(data[NAzimStep-1]['n_u']);
     matData['NumOutputs']      = int(data[NAzimStep-1]['n_y']);
 
+    #print(matData)
     # allocate space for these variables
     
     matData['Azimuth']   = np.zeros(NAzimStep);

@@ -64,8 +64,9 @@ def eiganalysis(A, ndof2, ndof1):
 
     mbc={}
     m, ns = A.shape;
+    #print(ndof2,ndof1, m,ns)
     if(m!=ns):
-        print('**ERROR: the state-space matrix is not a square matrix.');
+        sys.exit('**ERROR: the state-space matrix is not a square matrix.');
 
     if nargin == 1:
         ndof1 = 0;
@@ -83,6 +84,7 @@ def eiganalysis(A, ndof2, ndof1):
 
     ndof = ndof2 + ndof1;
 
+    #print(ndof, ndof2,ndof1, m,ns)
     origEvals, origEigenVects = np.linalg.eig(A); #,'nobalance'
     # errorInSolution = norm(A * mbc.EigenVects - mbc.EigenVects* diag(mbc.EigenVals) )
     # these eigenvalues aren't sorted, so we just take the ones with
@@ -143,7 +145,7 @@ def eiganalysis(A, ndof2, ndof1):
     # with open('DFreqs_Hz.txt', "a") as f:
     #     np.savetxt(f,mbc['DampedFreqs_Hz'],fmt='%g')
     #     f.write('\n')        
-    
+
     return mbc,EigenVects_save[:,:,0]
 
 def fx_mbc3(FileNames):
@@ -216,7 +218,7 @@ def fx_mbc3(FileNames):
         MBC['B']=np.zeros((len(new_seq_states),len(new_seq_inp),matData['NAzimStep']))
         MBC['C']=np.zeros(matData['C'].shape)
         MBC['D']=np.zeros(matData['D'].shape)
-        
+
         # print('new_seq_inp ',new_seq_inp)
         # print('new_seq_out ',new_seq_out)
         # print('new_seq_states ', new_seq_states)
@@ -309,10 +311,10 @@ def fx_mbc3(FileNames):
 
                 MBC['A'][new_seq_states[:,None],new_seq_states,iaz]=np.matmul(scp.block_diag(T1v, T1v, T1qv),(L-R))
 
-                # ffname='AAA'+str(iaz)+'.txt'
-                # with open(ffname, "a") as f:
-                #     np.savetxt(f,MBC['A'][:,:,iaz],fmt='%5.4f')
-                #     f.write('\n')
+                ffname='AAA'+str(iaz)+'.txt'
+                with open(ffname, "a") as f:
+                    np.savetxt(f,MBC['A'][:,:,iaz],fmt='%5.4f')
+                    f.write('\n')
 
             if 'B' in matData:
                 # Eq. 30
@@ -365,13 +367,12 @@ def fx_mbc3(FileNames):
     if 'A' in MBC:
         MBC['AvgA'] = np.mean(MBC['A'],axis=2); # azimuth-average of azimuth-dependent MBC.A matrices
         MBC['eigSol'], EigenVects_save = eiganalysis(MBC['AvgA'],matData['ndof2'], matData['ndof1']);
-        
+
         # ffname='AAA_avg'+'.txt'
         # with open(ffname, "a") as f:
         #     np.savetxt(f,MBC['AvgA'],fmt='%5.4f')
         #     f.write('\n')
 
-    
     # save eigenvectors (doing inverse of MBC3) for VTK visualization in FAST
     # if nargout > 3 or nargin > 1:
     #     [VTK] = GetDataForVTK(MBC, matData, nb, EigenVects_save);

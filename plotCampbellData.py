@@ -90,7 +90,7 @@ def plotCampbellData(OP, Freq, Damp, sx='WS_[m/s]', UnMapped=None, fig=None, axe
         axes=axes_
 
     # Estimating figure range
-    #FreqRange = [0                         , np.nanmax(Freq.iloc[:,:])*1.01]
+    FreqRange = [0                         , np.nanmax(Freq.iloc[:,:])*1.01]
     FreqRange = [0                         , 3.0]
     DampRange = [np.nanmin(Damp.iloc[:,2:]), np.nanmax(Damp.iloc[:,:])*1.01]
     if ylim is not None:
