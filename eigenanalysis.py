@@ -142,7 +142,7 @@ def eiganalysis(A, ndof2, ndof1):
 def fx_mbc3(FileNames):
     MBC={}
     matData, FAST_linData = gm.get_Mats(FileNames)
-    
+
     MBC['DescStates'] = matData['DescStates'] # save this in the MBC type for possible campbell_diagram processing later 
     MBC['ndof2'] = matData['ndof2']
     MBC['ndof1'] = matData['ndof1']
@@ -157,6 +157,7 @@ def fx_mbc3(FileNames):
     new_seq_dof1, dummy, dummy = get_new_seq(matData['RotTripletIndicesStates1'],matData['ndof1']); # these are the first-order ndof1 states; these values are used to calculate matrix transformations
 
     new_seq_states=np.concatenate((new_seq_dof2, new_seq_dof2+matData['ndof2']))
+
     if new_seq_dof1.size!=0:
         new_seq_states=np.concatenate((new_seq_states,new_seq_dof1+matData['NumStates2']))
     

@@ -23,7 +23,10 @@ def writeExcelData(MBC_data,OP,BladeLen,TowerHt,Pltform=False):
     StartCol_Phase=35
     Col_CD=3
 
-    wb = openpyxl.load_workbook('CampbellDiagram_Template_v1-FFF.xlsm',read_only=False, keep_vba= True) # open the excel workbook with  macros
+
+    path2File=os.path.dirname(sys.argv[0])
+    print(path2File)
+    wb = openpyxl.load_workbook(path2File+'/CampbellDiagram_Template_v1-FFF.xlsm',read_only=False, keep_vba= True) # open the excel workbook with  macros
 
     for (MBC,speed) in zip(MBC_data, OP):        
         NROWS=MBC['eigSol']['NaturalFreqs_Hz'].shape[0]
@@ -528,7 +531,7 @@ FileNames,OP,PltForm=getFastFiles(sys.argv[1])
 CampbellData,MBC_Data,BladeLen,TowerHt=runMBC(FileNames)
 print('Preparing campbell diagram data!');
 
-writeExcelDataPlf(MBC_Data,OP,BladeLen,TowerHt,PltForm);
+writeExcelData(MBC_Data,OP,BladeLen,TowerHt,PltForm);
 
 modeID_table,modesDesc=IdentifyModes(CampbellData)
 
