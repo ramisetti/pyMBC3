@@ -248,7 +248,7 @@ def readFASTMatrix(f):
         tmp=np.array(tmp)
     return name,tmp
     
-def ReadFASTLinear(filename):
+def readFASTLinear(filename):
     with open(filename) as f:
         info = {}
         data = {}
@@ -355,7 +355,7 @@ def ReadFASTLinear(filename):
             raise
 
 
-def get_Mats(FileNames):
+def getMatrices(FileNames):
     matData={}
     matData['NAzimStep']= len(FileNames);
     data=[None]*matData['NAzimStep']
@@ -363,7 +363,7 @@ def get_Mats(FileNames):
     #print('NAzimStep : ', matData['NAzimStep'])
 
     # Input data from linearization files
-    data[NAzimStep-1],info     = ReadFASTLinear(FileNames[NAzimStep-1]);
+    data[NAzimStep-1],info     = readFASTLinear(FileNames[NAzimStep-1]);
     matData['NumStates']       = int(data[NAzimStep-1]['n_x']);
     matData['NumStates2']      = int(data[NAzimStep-1]['n_x2']);
 
@@ -418,7 +418,7 @@ def get_Mats(FileNames):
 
     for iFile in np.arange(0,NAzimStep):
         
-        data[iFile],info     = ReadFASTLinear(FileNames[iFile]);
+        data[iFile],info     = readFASTLinear(FileNames[iFile]);
         matData['Omega'][iFile]   = data[iFile]['RotSpeed'];
         matData['Azimuth'][iFile] = data[iFile]['Azimuth']*180/np.pi;
 

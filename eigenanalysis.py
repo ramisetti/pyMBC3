@@ -141,7 +141,7 @@ def eiganalysis(A, ndof2, ndof1):
 
 def fx_mbc3(FileNames):
     MBC={}
-    matData, FAST_linData = gm.get_Mats(FileNames)
+    matData, FAST_linData = gm.getMatrices(FileNames)
 
     MBC['DescStates'] = matData['DescStates'] # save this in the MBC type for possible campbell_diagram processing later 
     MBC['ndof2'] = matData['ndof2']
