@@ -12,3 +12,5 @@ Scipy (1.5.2)
 Matplotlib (3.3.0)
 
 Openpxyl (3.0.4)
+
+Xlsxwriter (3.0.2)
