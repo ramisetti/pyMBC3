@@ -105,7 +105,7 @@ def writeExcelData(MBC_data,OP,BladeLen,TowerHt,Pltform=False):
         else:
             print("The worksheet '{}' does not exist in the template workbook".format(str(int(speed))+' RPM'))
 
-        wb.save('CampbellData-v2.xlsm') #save it as a new file with macros enables
+        wb.save('./results/CampbellData-v2.xlsm') #save it as a new file with macros enables
 
 
 def readExcelData(fileExcel):

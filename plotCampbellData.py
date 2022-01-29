@@ -136,7 +136,7 @@ def plotCampbellData(OP, Freq, Damp, sx='WS_[m/s]', UnMapped=None, fig=None, axe
     axes[1].plot(XLIM, [0,0],'-', color='k', lw=0.5)
     axes[1].set_xlim(XLIM)
     axes[1].set_ylim(DampRange)
-    path_to_save_fig=os.getcwd()+'/CampbellDiagram.png'
+    path_to_save_fig=os.getcwd()+'/results/CampbellDiagram.png'
     print('Saving image to ', path_to_save_fig)
     fig.savefig(path_to_save_fig, dpi=300)
     return fig, axes

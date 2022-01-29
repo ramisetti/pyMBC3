@@ -249,7 +249,11 @@ def main():
     CampbellData,MBC_Data,BladeLen,TowerHt=applyMBC(FileNames)
     print('Preparing campbell diagram data!');
 
-    pMBC.writeExcelData(MBC_Data,OP,BladeLen,TowerHt,PltForm);
+    if not os.path.exists('./results'):
+        os.mkdir('./results')
+
+    #uncomment the below line to write the v2 xlsm file
+    #pMBC.writeExcelData(MBC_Data,OP,BladeLen,TowerHt,PltForm);
 
     modeID_table,modesDesc=pMBC.IdentifyModes(CampbellData)
 
@@ -310,7 +314,7 @@ def main():
     # dfggg.to_excel(dbgwriter)
     # dbgwriter.save()
 
-    writer = pd.ExcelWriter('CampbellData.xlsx', engine='xlsxwriter')
+    writer = pd.ExcelWriter('./results/CampbellData.xlsx', engine='xlsxwriter')
     frequency.to_excel(writer,sheet_name='FrequencyHz')
     dampratio.to_excel(writer,sheet_name='DampingRatios')
 

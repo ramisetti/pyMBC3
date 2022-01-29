@@ -291,10 +291,10 @@ def fx_mbc3(FileNames):
 
                 MBC['A'][new_seq_states[:,None],new_seq_states,iaz]=np.matmul(scp.block_diag(T1v, T1v, T1qv),(L-R))
 
-                ffname='AAA'+str(iaz)+'.txt'
-                with open(ffname, "a") as f:
-                    np.savetxt(f,MBC['A'][:,:,iaz],fmt='%5.4f')
-                    f.write('\n')
+                # ffname='AAA'+str(iaz)+'.txt'
+                # with open(ffname, "a") as f:
+                #     np.savetxt(f,MBC['A'][:,:,iaz],fmt='%5.4f')
+                #     f.write('\n')
 
             if 'B' in matData:
                 # Eq. 30
